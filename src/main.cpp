@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <vector>
 #include <fstream>
 
@@ -6,10 +7,10 @@ class Brainfuck {
   public:
     int mp; // memory pointer
     int ip; // instruction pointer
-    const char* instructions; // using char* for now because i dont feel like working with msvc's weirdness
+    std::string instructions;
     std::vector<char> memory;
 
-    Brainfuck(const char* program) {
+    Brainfuck(const std::string program) {
         this->memory = std::vector<char>(30000, 0);
         this->instructions = program;
         this->ip = 0;
@@ -94,6 +95,8 @@ class Brainfuck {
                 case ']':
                     jumpBackward();
                     break;
+                default:  // Assume this is a comment
+                    break;
             }
             ip++;
         }
@@ -101,7 +104,21 @@ class Brainfuck {
 };
 
 int main(int argc, char** argv) {
-    char buffer[] = ">++++++++[<+++++++++>-]<.>>+>+>++>[-]+<[>[->+<<++++>]<<]>.+++++++..+++.>>+++++++.<<<[[-]<[-]>]<+++++++++++++++.>>.+++.------.--------.>>+.>++++.";
+    if (argc < 2){
+        printf("No arguments given\n");
+        printf("Usage: brainfuck <file>\n");
+        return 0;
+    }
+    std::string sourceDir = argv[1];
+
+    std::fstream file;
+    file.open(sourceDir, std::ios::in);
+    // check if file exists on disk 
+    if (file.fail()) {
+        printf("File not found\n");
+        return 0;
+    }
+    std::string buffer((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     Brainfuck interpreter = Brainfuck(buffer);
     interpreter.interpret();
     return 0;
